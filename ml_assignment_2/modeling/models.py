@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
-from sklearn.model_selection import RandomizedSearchCV
+import optuna
+from sklearn.model_selection import RandomizedSearchCV, cross_val_score
 from sklearn.metrics import f1_score, roc_auc_score
 
 class Models(ABC):
-    def __init__(self, prune=None, random_state=None, param_dist=None):
+    def __init__(self, prune=None, random_state=None, param_dist=None, n_trials=50):
         self.prune  = prune
         self.random_state = random_state
         self.param_dist = param_dist
+        self.n_trials = n_trials
         self.model = None
         self.clf = None
 
@@ -20,6 +22,33 @@ class Models(ABC):
 
     def get_param_dist(self):
         return self.param_dist if self.param_dist is not None else self.get_default_params()
+
+    def objective(self, trial, X_train, y_train):
+        clf = self.classifier()
+        param_dist = self.get_param_dist()
+        params = {}
+        for key, value in param_dist.items():
+            if isinstance(value, list):
+                params[key]= trial.suggest_categorical(key, value)
+            elif isinstance(value, tuple) and len(value) == 2:
+                if all(isinstance(v, int) for v in value):
+                    params[key] = trial.suggest_int(key, value[0], value[1])
+                else:
+                    params[key] = trial.suggest_float(key, value[0], value[1])
+            else:
+                raise ValueError(f"Unsupported param type for {key}: {value}")
+        clf.set_params(**params)
+        score = cross_val_score(clf, X_train, y_train, cv=5, scoring="f1-micro").mean()
+        return score
+    
+    def train_optuna(self, X_train, y_train):
+        study = optuna.create_study(direction="maximize")
+        study.optimize(lambda trial: self.objective(trial, X_train, y_train), n_trials=self.n_trials)
+        best_params = study.best_params
+        self.clf = self.classifier()
+        self.clf.set_params(**best_params)
+        self.model = self.clf.fit(X_train, y_train)
+        return self.model
 
     def train(self, X_train, y_train):
         if self.clf is None:
@@ -37,12 +66,12 @@ class Models(ABC):
 
     def train_pred(self, X_train):
         if self.model is None:
-            raise ValueError("Model has not been trained yet. Call .train(X_train, y_train) first.")
+            raise ValueError("Model has not been trained yet. Call .train(X_train, y_train) or .train_optuna(X_train, y_train) first.")
         return self.model.predict(X_train)
 
     def test_pred(self, X_test):
         if self.model is None:
-            raise ValueError("Model has not been trained yet. Call .train(X_train, y_train) first.")
+            raise ValueError("Model has not been trained yet. Call .train(X_train, y_train) or .train_optuna(X_train, y_train) first.")
         return self.model.predict(X_test)
 
     def evaluate(self, X_train, X_test, y_train, y_test):
