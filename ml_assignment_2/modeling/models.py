@@ -48,6 +48,7 @@ class Models(ABC):
         self.clf = self.classifier()
         self.clf.set_params(**best_params)
         self.model = self.clf.fit(X_train, y_train)
+        self.best_params = best_params
         return self.model
 
     def train(self, X_train, y_train):
