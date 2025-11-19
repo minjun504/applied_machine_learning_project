@@ -9,6 +9,50 @@ PROCESSED_DIR = DATA_DIR / "processed"
 MODEL_DIR = PROJECT_ROOT / "models"
 RESULTS_DIR = PROJECT_ROOT / "reports"
 
+optuna_pre_prune_tree_params = {
+    "max_depth": (1, 20),              
+    "min_samples_leaf": (1, 20),        
+    "min_samples_split": (2, 50),             
+    "max_leaf_nodes": (10, 300),            
+    "min_impurity_decrease": (0.0, 0.2),      
+    "criterion": ["gini", "entropy"]
+}
+
+optuna_post_prune_tree_params = {
+    "ccp_alpha": (0.0, 0.05),     
+    "criterion": ["gini", "entropy"]
+}
+
+optuna_random_forest_params = {
+    "n_estimators": (50, 500),    
+    "max_depth": (3, 20),         
+    "min_samples_split": (2, 20),
+    "min_samples_leaf": (1, 10),  
+    "criterion": ["gini", "entropy"],
+    "bootstrap": [True, False]
+}
+
+optuna_gradient_boost_params = {
+    "n_estimators": (50, 400),       
+    "learning_rate": (0.01, 0.2),       
+    "max_depth": (2, 6),              
+    "min_samples_split": (2, 20),      
+    "min_samples_leaf": (1, 10)         
+}
+
+optuna_xgboost = {
+    "n_estimators": (50, 400),            
+    "learning_rate": (0.01, 0.3),         
+    "max_depth": (3, 10),                 
+    "min_child_weight": (1, 10),          
+    "subsample": (0.5, 1.0),              
+    "colsample_bytree": (0.5, 1.0),       
+    "gamma": (0, 0.3),                    
+    "reg_alpha": (0, 1.0),                
+    "reg_lambda": (0, 1.0) 
+}
+
+
 pre_prune_tree_params = {
                 "max_depth": np.arange(1, 11),
                 "min_samples_leaf": np.arange(1, 21),

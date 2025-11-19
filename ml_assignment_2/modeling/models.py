@@ -4,11 +4,12 @@ from sklearn.model_selection import RandomizedSearchCV, cross_val_score
 from sklearn.metrics import f1_score, roc_auc_score
 
 class Models(ABC):
-    def __init__(self, prune=None, random_state=None, param_dist=None, n_trials=50):
+    def __init__(self, prune=None, random_state=None, param_dist=None, n_trials=50, hp_method="optuna"):
         self.prune  = prune
         self.random_state = random_state
         self.param_dist = param_dist
         self.n_trials = n_trials
+        self.hp_method=hp_method
         self.model = None
         self.clf = None
 
@@ -17,11 +18,22 @@ class Models(ABC):
         raise NotImplementedError("Subclasses must define a classifier.")
 
     @abstractmethod
-    def get_default_params(self):
-        raise NotImplementedError("Subclasses must define param distributions.")
+    def get_optuna_params(self):
+        pass
+
+    @abstractmethod
+    def get_randomsearch_params(self):
+        pass
 
     def get_param_dist(self):
-        return self.param_dist if self.param_dist is not None else self.get_default_params()
+        if self.param_dist is not None:
+            return self.param_dist
+        if self.hp_method == "optuna":
+            return self.get_optuna_params()
+        elif self.hp_method =="random":
+            return self.get_randomsearch_params()
+        else:
+            raise ValueError(f"Unknown search method {self.hp_method}")
 
     def objective(self, trial, X_train, y_train):
         clf = self.classifier()
