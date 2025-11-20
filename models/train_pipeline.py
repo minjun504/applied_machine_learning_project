@@ -9,7 +9,7 @@ from ml_assignment_2.config import RESULTS_DIR
 
 
 model_names = ["pre_tree", "post_tree", "rf", "gb", "xgb"]
-metrics = {name: {"train_f1": [], "test_f1": []}
+metrics = {name: {"train_f1": [], "test_f1": [], "train_auc": [], "test_auc": []}
            for name in model_names
 }
 
@@ -27,12 +27,12 @@ for i in range(5):
     y_test  -= 1
 
     for model_name, model in models.items():
-        model.train(X_train, y_train)
-        train_f1, test_f1 = model.evaluate(
+        model.train_optuna(X_train, y_train)
+        results = model.evaluate(
             X_train, X_test, y_train, y_test
         )
-        metrics[model_name]["train_f1"].append(train_f1)
-        metrics[model_name]["test_f1"].append(test_f1)
+        for metric_name in results:
+            metrics[model_name][metric_name].append(results[metric_name])
 
 summary = {}
 
