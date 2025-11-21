@@ -11,8 +11,12 @@ model_names = ["dt", "rf", "gb", "xgb"]
 n_splits = 5
 
 metrics = {name: {"train_f1": [], "test_f1": [], "train_auc": [], "test_auc": []} for name in model_names}
-best_params_storage = {name: [] for name in model_names}
-trained_models = {}  
+
+best_model = None
+best_model_name = None
+best_score = -np.inf
+best_params = None
+best_split = None
 
 for i in range(n_splits):
     X_train, X_test, y_train, y_test = load_and_split_data(i, file_name="abalone.data", test_size=0.2)
@@ -32,9 +36,15 @@ for i in range(n_splits):
         results = model.evaluate(X_train, X_test, y_train, y_test)
         for metric_name in results:
             metrics[model_name][metric_name].append(results[metric_name])
+        
+        current_score = results["test_f1"]
 
-        best_params_storage[model_name].append(model.get_best_params())
-        trained_models[model_name] = model
+        if current_score > best_score:
+            best_score = current_score
+            best_model = model                  
+            best_params = model.get_best_params()
+            best_model_name = model_name
+            best_split = i
 
 summary = {}
 
