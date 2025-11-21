@@ -1,5 +1,5 @@
 from sklearn.ensemble import GradientBoostingClassifier
-from ml_assignment_2.config import gradient_boost_params
+from src.config import gradient_boost_params
 from .models import Models
 
 class GradientBoost(Models):

@@ -1,6 +1,6 @@
 from xgboost import XGBClassifier
 from .models import Models
-from ml_assignment_2.config import xgboost_params
+from src.config import xgboost_params
 
 class XGBoost(Models):
     def __init__(self, prune=None, random_state=None, n_trials=50):

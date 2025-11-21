@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
-from ml_assignment_2.config import RAW_DIR, PROCESSED_DIR
+from src.config import RAW_DIR, PROCESSED_DIR
 
 def load_and_split_data(random_state, file_name, test_size=0.2, save_csv=False):
     features = ["sex", "length", "diameter", "height", "whole_weight", 

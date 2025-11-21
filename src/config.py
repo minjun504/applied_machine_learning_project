@@ -9,6 +9,16 @@ PROCESSED_DIR = DATA_DIR / "processed"
 MODEL_DIR = PROJECT_ROOT / "models"
 RESULTS_DIR = PROJECT_ROOT / "reports"
 
+decision_tree_params = {
+    "max_depth": (1, 20),              
+    "min_samples_leaf": (1, 20),        
+    "min_samples_split": (2, 50),             
+    "max_leaf_nodes": (10, 300),            
+    "min_impurity_decrease": (0.0, 0.2),
+    "ccp_alpha": (0.0, 0.05),      
+    "criterion": ["gini", "entropy"]
+}
+
 pre_prune_tree_params = {
     "max_depth": (1, 20),              
     "min_samples_leaf": (1, 20),        
@@ -51,3 +61,5 @@ xgboost_params = {
     "reg_alpha": (0, 1.0),                
     "reg_lambda": (0, 1.0) 
 }
+
+neural_network_params ={}
