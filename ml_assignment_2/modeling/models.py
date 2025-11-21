@@ -1,15 +1,13 @@
 from abc import ABC, abstractmethod
 import optuna
-from sklearn.model_selection import RandomizedSearchCV, cross_val_score
+from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score, roc_auc_score
 
 class Models(ABC):
-    def __init__(self, prune=None, random_state=None, param_dist=None, n_trials=50, hp_method="optuna"):
+    def __init__(self, prune=None, random_state=None, n_trials=50):
         self.prune  = prune
         self.random_state = random_state
-        self.param_dist = param_dist
         self.n_trials = n_trials
-        self.hp_method=hp_method
         self.best_params = None
         self.model = None
         self.clf = None
@@ -19,26 +17,12 @@ class Models(ABC):
         raise NotImplementedError("Subclasses must define a classifier.")
 
     @abstractmethod
-    def get_optuna_params(self):
+    def get_params(self):
         pass
-
-    @abstractmethod
-    def get_randomsearch_params(self):
-        pass
-
-    def get_param_dist(self):
-        if self.param_dist is not None:
-            return self.param_dist
-        if self.hp_method == "optuna":
-            return self.get_optuna_params()
-        elif self.hp_method =="random":
-            return self.get_randomsearch_params()
-        else:
-            raise ValueError(f"Unknown search method {self.hp_method}")
 
     def objective(self, trial, X_train, y_train):
         clf = self.classifier()
-        param_dist = self.get_param_dist()
+        param_dist = self.get_params()
         params = {}
         for key, value in param_dist.items():
             if isinstance(value, list):
@@ -51,7 +35,7 @@ class Models(ABC):
             else:
                 raise ValueError(f"Unsupported param type for {key}: {value}")
         clf.set_params(**params)
-        score = cross_val_score(clf, X_train, y_train, cv=5, scoring="f1-micro").mean()
+        score = cross_val_score(clf, X_train, y_train, cv=5, scoring="f1_micro").mean()
         return score
     
     def train_optuna(self, X_train, y_train):
@@ -63,21 +47,6 @@ class Models(ABC):
         self.model = self.clf.fit(X_train, y_train)
         self.best_params = best_params
         return self.model
-
-    def train(self, X_train, y_train):
-        if self.clf is None:
-            self.clf = self.classifier()
-        search = RandomizedSearchCV(
-            estimator = self.clf, 
-            param_distributions=self.get_param_dist(),
-            n_iter=50,
-            cv=5,
-            random_state=self.random_state,
-            n_jobs=-1
-        )
-        self.model = search.fit(X_train, y_train)
-        self.best_params = search.best_params_
-        return self.model.best_estimator_
     
     def get_best_params(self):
         if self.best_params is None:
@@ -97,5 +66,24 @@ class Models(ABC):
     def evaluate(self, X_train, X_test, y_train, y_test):
         y_train_pred = self.train_pred(X_train)
         y_test_pred = self.test_pred(X_test)
+
+        y_train_proba = self.model.predict_proba(X_train)
+        y_test_proba = self.model.predict_proba(X_test)
+
         avg = "micro"
-        return f1_score(y_train, y_train_pred, average=avg), f1_score(y_test, y_test_pred, average=avg)
+        train_f1 = f1_score(y_train, y_train_pred, average=avg)
+        test_f1 = f1_score(y_test, y_test_pred, average=avg)
+
+        if y_train_proba.shape[1] == 2:
+            train_auc = roc_auc_score(y_train, y_train_proba[:, 1])
+            test_auc = roc_auc_score(y_test, y_test_proba[:, 1])
+        else:
+            train_auc = roc_auc_score(y_train, y_train_proba, multi_class="ovr")
+            test_auc = roc_auc_score(y_test, y_test_proba, multi_class="ovr")
+        
+        return {
+            "train_f1": train_f1,
+            "test_f1": test_f1,
+            "train_auc": train_auc,
+            "test_auc": test_auc
+        }
