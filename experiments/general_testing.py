@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pickle
 from src.modeling.decision_tree import DecisionTree
 from src.modeling.random_forest import RandomForest
 from src.modeling.gradient_boost import GradientBoost
@@ -24,10 +25,10 @@ for i in range(n_splits):
     y_test  -= 1
 
     models = {
-        "dt": DecisionTree(random_state=i),
-        "rf": RandomForest(random_state=i),
-        "gb": GradientBoost(random_state=i),
-        "xgb": XGBoost(random_state=i)
+        "dt": DecisionTree(random_state=i, n_trials=10),
+        "rf": RandomForest(random_state=i, n_trials=10),
+        "gb": GradientBoost(random_state=i, n_trials=10),
+        "xgb": XGBoost(random_state=i, n_trials=10)
     }
 
     for model_name, model in models.items():
@@ -58,3 +59,11 @@ for model_name, model_metrics in metrics.items():
 df = pd.DataFrame(summary).T
 df.to_excel(f"{RESULTS_DIR}/model_comparison_table_1.xlsx", index=True)
 print(f"Results saved to Excel file in {RESULTS_DIR}!")
+
+with open(f"{RESULTS_DIR}/best_model.pkl", "wb") as f:
+    pickle.dump(best_model, f)
+print("==== Overall Best Model ====")
+print(f"Model: {best_model_name}")
+print(f"Best split: {best_split}")
+print(f"Best test F1: {best_score}")
+print(f"Best hyperparameters: {best_params}")
