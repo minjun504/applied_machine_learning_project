@@ -15,10 +15,9 @@ metrics_over_n = {
     "test_auc": []
 }
 
-rf = RandomForest(random_state=0)
+rf = RandomForest(random_state=0, n_estimator=100)
 rf.train_optuna(X_train, y_train)
 best_params = rf.get_best_params()
-
 
 for n in n_list:
     rf = RandomForest(random_state=0, n_estimator=n)

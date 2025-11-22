@@ -14,7 +14,6 @@ decision_tree_params = {
     "min_samples_leaf": (1, 20),        
     "min_samples_split": (2, 50),             
     "max_leaf_nodes": (10, 300),            
-    "min_impurity_decrease": (0.0, 0.2),
     "ccp_alpha": (0.0, 0.05),      
     "criterion": ["gini", "entropy"]
 }
@@ -47,18 +46,18 @@ gradient_boost_params = {
     "learning_rate": (0.01, 0.2),       
     "max_depth": (2, 6),              
     "min_samples_split": (2, 20),      
-    "min_samples_leaf": (1, 10)         
+    "min_samples_leaf": (1, 10),
+    "subsample": (0.7, 1.0)     
 }
 
 xgboost_params = {
     "n_estimators": (50, 400),            
     "learning_rate": (0.01, 0.3),         
-    "max_depth": (3, 10),                 
+    "max_depth": (2, 6),                 
     "min_child_weight": (1, 10),          
-    "subsample": (0.5, 1.0),              
-    "colsample_bytree": (0.5, 1.0),       
+    "subsample": (0.6, 1.0),              
+    "colsample_bytree": (0.6, 1.0),       
     "gamma": (0, 0.3),                    
-    "reg_alpha": (0, 1.0),                
     "reg_lambda": (0, 1.0) 
 }
 

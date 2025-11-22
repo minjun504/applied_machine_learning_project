@@ -12,4 +12,3 @@ class GradientBoost(Models):
     
     def get_params(self):
         return gradient_boost_params
-    

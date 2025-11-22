@@ -38,8 +38,12 @@ class Models(ABC):
         return score
     
     def train_optuna(self, X_train, y_train):
-        study = optuna.create_study(direction="maximize")
-        study.optimize(lambda trial: self.objective(trial, X_train, y_train), n_trials=self.n_trials)
+        study = optuna.create_study(direction="maximize",
+                                    sampler=optuna.samplers.TPESampler(n_startup_trials=15, multivariate=True),
+                                    pruner=optuna.pruners.MedianPruner(n_warmup_steps=1))
+        study.optimize(lambda trial: self.objective(trial, X_train, y_train), 
+                       n_trials=self.n_trials,
+                       n_jobs=-1)
         best_params = study.best_params
         self.clf = self.classifier()
         self.clf.set_params(**best_params)
@@ -47,6 +51,13 @@ class Models(ABC):
         self.best_params = best_params
         return self.model
     
+    def train_with_params(self, X_train, y_train, params):
+        self.clf = self.classifier()
+        self.clf.set_params(**params)
+        self.model = self.clf.fit(X_train, y_train)
+        self.best_params = params
+        return self.model
+
     def get_best_params(self):
         if self.best_params is None:
             raise ValueError("No hyperparameters were found.")
