@@ -4,9 +4,9 @@ from src.config import pre_prune_tree_params, post_prune_tree_params, decision_t
 
 class DecisionTree(Models):
     def __init__(self, prune=None, random_state=None, n_trials=50):
-        super().__init__(prune=prune, 
-                         random_state=random_state, 
+        super().__init__(random_state=random_state, 
                          n_trials=n_trials)
+        self.prune = prune
 
     def classifier(self):
         return DecisionTreeClassifier(random_state=self.random_state)

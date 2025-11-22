@@ -4,8 +4,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score, roc_auc_score
 
 class Models(ABC):
-    def __init__(self, prune=None, random_state=None, n_trials=50):
-        self.prune  = prune
+    def __init__(self, random_state=None, n_trials=50):
         self.random_state = random_state
         self.n_trials = n_trials
         self.best_params = None

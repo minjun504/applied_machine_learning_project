@@ -3,9 +3,8 @@ from models import Models
 from src.config import neural_network_params
 
 class neural_network(Models):
-    def __init__(self, prune=None, random_state=None, n_trials=50, solver=None):
-        super().__init__(prune=prune, 
-                         random_state=random_state,
+    def __init__(self, random_state=None, n_trials=50, solver=None):
+        super().__init__(random_state=random_state,
                          n_trials=n_trials)
         self.solver = solver
         
