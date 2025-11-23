@@ -10,7 +10,7 @@ n_splits = 50
 alpha_values = [0.0001, 0.001, 0.01]  
 pca_ratios = [0.95, 0.98]
 solvers = ["adam", "sgd"]
-selected_features = ["length", "diameter", "height", "shell_weight", "sex_M"]
+selected_features = ["length", "diameter"]
 
 def get_dataset_variants(X_train, X_test, random_state):
     variants = {}
